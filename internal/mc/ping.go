@@ -7,7 +7,6 @@ import (
 	"net"
 	"time"
 
-	mcbot "github.com/Tnze/go-mc/bot"
 	mcnet "github.com/Tnze/go-mc/net"
 )
 
@@ -71,25 +70,4 @@ func Ping(ctx context.Context, addr string, timeout time.Duration) (PingResult, 
 		RTTTime:   RTTDuration,
 		TotalTime: time.Since(totalStart),
 	}, nil
-}
-
-// legacy go-mc bot pack ping,is not used in this project
-//
-// Deprecated: use Ping instead.
-func BotPing(ctx context.Context, addr string, timeout time.Duration) (bool, int, time.Duration, error) {
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-	resp, delay, err := mcbot.PingAndListContext(ctx, addr)
-	if err != nil {
-		return false, 0, 0, fmt.Errorf("ping %s: %w", addr, err)
-	}
-	var status struct {
-		Players struct {
-			Online int `json:"online"`
-		} `json:"players"`
-	}
-	if err := json.Unmarshal(resp, &status); err != nil {
-		return false, 0, 0, fmt.Errorf("decode json error: %w", err)
-	}
-	return true, status.Players.Online, delay, nil
 }
