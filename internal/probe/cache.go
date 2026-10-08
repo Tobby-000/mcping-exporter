@@ -35,3 +35,8 @@ func (c *Cache) Snapshot() map[string]ProbeResult {
 	defer c.mu.RUnlock()
 	return maps.Clone(c.status)
 }
+func (c *Cache) Delete(name string){
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	delete(c.status,name)
+}

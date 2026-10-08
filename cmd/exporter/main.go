@@ -16,6 +16,7 @@ import (
 	"mcping-exporter/internal/collector"
 	"mcping-exporter/internal/config"
 	"mcping-exporter/internal/probe"
+	"mcping-exporter/internal/watch"
 )
 
 func main() {
@@ -29,14 +30,16 @@ func main() {
 	}))
 	slog.SetDefault(logger)
 	// load config
-	cfg, err := config.Load(*configPath)
+	cfg, modTime, err := config.Load(*configPath)
 	if err != nil {
 		logger.Error("failed to load config", "path", *configPath, "err", err)
 		os.Exit(1)
 	}
+
 	for _, w := range cfg.Warns() {
 		logger.Warn(w)
 	}
+
 	// Cache Init
 	cache := probe.NewCache()
 	// targets
@@ -55,12 +58,28 @@ func main() {
 		time.Duration(cfg.Probe.Timeout)*time.Second,
 		cfg.Probe.Limit,
 		logger)
-	// context Init
+	// context init
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	go prober.Run(ctx)
 
+	// watcher init
+	reload := func() error {
+		newCfg, _, err := config.Load(*configPath)
+		if err != nil {
+			return err
+		}
+
+		newTargets := make([]probe.Target, 0, len(newCfg.Targets))
+		for _, t := range newCfg.Targets {
+			newTargets = append(newTargets, probe.Target{Name: t.Name, Addr: t.Addr})
+		}
+		return prober.Reload(ctx, newTargets)
+	}
+
+	watcher := watch.New(*configPath, 5*time.Second, modTime, reload, logger)
+	go watcher.Run(ctx)
 	// collector regist and init
 
 	mc := collector.NewMCCollector(cache)

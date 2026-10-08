@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -24,12 +25,15 @@ type Config struct {
 	Targets []Target    `yaml:"targets"`
 }
 
-func Load(path string) (*Config, error) {
+func Load(path string) (*Config, time.Time, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("read config %s: %w", path, err)
+		return nil, time.Time{}, fmt.Errorf("read config %s: %w", path, err)
 	}
-
+	info, err := os.Stat(path)
+	if err != nil {
+		return nil, time.Time{}, fmt.Errorf("stat config %s: %w", path, err)
+	}
 	cfg := Config{
 		Probe: ProbeConfig{
 			Interval: 15,
@@ -38,12 +42,13 @@ func Load(path string) (*Config, error) {
 		},
 	}
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return nil, fmt.Errorf("decode yaml %s: %w", path, err)
+		return nil, time.Time{}, fmt.Errorf("decode yaml %s: %w", path, err)
 	}
 	if err := cfg.validate(); err != nil {
-		return nil, fmt.Errorf("invalid config: %w", err)
+		return nil, time.Time{}, fmt.Errorf("invalid config: %w", err)
 	}
-	return &cfg, nil
+
+	return &cfg, info.ModTime(), nil
 }
 
 func (c *Config) validate() error {
