@@ -46,8 +46,7 @@ func (w *Watcher) check() {
 		return
 	}
 	mod := info.ModTime()
-	// please remove before commit
-	w.logger.Info("watch tick", "path", w.path, "mod", mod, "lastMod", w.lastMod, "changed", !mod.Equal(w.lastMod))
+	w.logger.Debug("watch tick", "path", w.path, "mod", mod, "lastMod", w.lastMod, "changed", !mod.Equal(w.lastMod))
 	if mod.Equal(w.lastMod) {
 		return
 	}

@@ -97,7 +97,7 @@ func (p *Prober) Reload(ctx context.Context, targets []Target) error {
 }
 
 func (p *Prober) applyReload(newTargets []Target) {
-	p.logger.Info("applyReload start", "count", len(newTargets))
+	p.logger.Debug("applyReload start", "count", len(newTargets))
 	oldTargets := *p.targets.Load()
 	// 移除已经被删除的targets缓存
 	newNames := make(map[string]struct{}, len(newTargets))
