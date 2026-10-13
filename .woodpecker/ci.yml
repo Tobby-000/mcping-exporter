@@ -1,0 +1,19 @@
+when:
+  - event: push
+    branch: main
+  - event: manual
+  
+steps:
+  - name: test
+    image: golang:1.27
+    commands:
+      - go env -w GOPROXY=https://goproxy.cn,direct
+      - go env -w GOSUMDB=sum.golang.google.cn
+      - go mod download
+      - go vet ./...
+      - go test ./... -race -count=1
+      - go build ./...
+  - name: lint
+    image: golangci/golangci-lint:v2.14.0
+    commands:
+      - golangci-lint run
