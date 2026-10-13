@@ -2,7 +2,7 @@ when:
   - event: push
     branch: main
   - event: manual
-  
+
 steps:
   - name: test
     image: golang:1.27
@@ -15,5 +15,8 @@ steps:
       - go build ./...
   - name: lint
     image: golangci/golangci-lint:v2.14.0
+    environment:
+      GOPROXY: https://goproxy.cn,direct
+      GOSUMDB: sum.golang.google.cn
     commands:
       - golangci-lint run
