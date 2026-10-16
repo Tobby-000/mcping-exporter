@@ -5,14 +5,16 @@ when:
 
 steps:
   - name: test
-    image: golang:1.27
+    image: golang:1.27-alpine
+    environment:
+      GOPROXY: https://goproxy.cn,direct
+      GOSUMDB: sum.golang.google.cn
     commands:
-      - go env -w GOPROXY=https://goproxy.cn,direct
-      - go env -w GOSUMDB=sum.golang.google.cn
       - go mod download
       - go vet ./...
       - go test ./... -race -count=1
       - go build ./...
+
   - name: lint
     image: golangci/golangci-lint:v2.14.0
     environment:
@@ -20,3 +22,50 @@ steps:
       GOSUMDB: sum.golang.google.cn
     commands:
       - golangci-lint run
+    depends_on: [test]
+
+  - name: build-and-push
+    image: woodpeckerci/plugin-kaniko
+    settings:
+      registry:
+        from_secret: registry_host
+      repo:
+        from_secret: image_repo
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA:0:8}
+      dockerfile: Dockerfile
+      context: .
+      cache: true
+      cache_repo:
+        from_secret: cache_repo
+      username:
+        from_secret: registry_username
+      password:
+        from_secret: registry_password
+      mirrors:
+        from_secret: docker_mirror
+      build_args:
+        - GOPROXY=https://goproxy.cn,direct
+        - GOSUMDB=sum.golang.google.cn
+        - APK_MIRROR=mirrors.tuna.tsinghua.edu.cn
+    depends_on: [lint]
+
+  - name: notify-deploy
+    image: alpine/curl
+    environment:
+      DEPLOY_URL:
+        from_secret: deploy_url
+      DEPLOY_TOKEN:
+        from_secret: deploy_token
+      REGISTRY_HOST:
+        from_secret: registry_host
+      IMAGE_REPO:
+        from_secret: image_repo
+    commands:
+      - |
+        curl -sf -X POST "$DEPLOY_URL" \
+          -H "Content-Type: application/json" \
+          -H "X-Deploy-Token: $DEPLOY_TOKEN" \
+          -d '{"repo":"'"${CI_REPO}"'","sha":"'"${CI_COMMIT_SHA}"'","tag":"test","image":"'"${REGISTRY_HOST}/${IMAGE_REPO}"'"}'
+    depends_on: [build-and-push]
