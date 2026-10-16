@@ -14,7 +14,7 @@ steps:
       - go vet ./...
       - go test ./... -race -count=1
       - go build ./...
-      
+
   - name: lint
     image: golangci/golangci-lint:v2.14.0
     environment:
@@ -32,7 +32,7 @@ steps:
       repo:
         from_secret: image_repo
       tags:
-        - latest
+        - test
         - ${CI_COMMIT_SHA:0:8}
       dockerfile: Dockerfile
       context: .
