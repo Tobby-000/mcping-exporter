@@ -64,8 +64,8 @@ steps:
         from_secret: image_repo
     commands:
       - |
-        curl -sf -X POST "$DEPLOY_URL" \
+        curl -sf -X POST "$$DEPLOY_URL" \
           -H "Content-Type: application/json" \
-          -H "X-Deploy-Token: $DEPLOY_TOKEN" \
-          -d '{"repo":"'"${CI_REPO}"'","sha":"'"${CI_COMMIT_SHA}"'","tag":"test","image":"'"${REGISTRY_HOST}/${IMAGE_REPO}"'"}'
+          -H "X-Deploy-Token: $$DEPLOY_TOKEN" \
+          -d '{"repo":"'"${CI_REPO}"'","sha":"'"${CI_COMMIT_SHA}"'","tag":"test","image":"'"$$REGISTRY_HOST/$$IMAGE_REPO"'"}'
     depends_on: [build-and-push]
