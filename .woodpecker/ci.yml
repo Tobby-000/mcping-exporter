@@ -5,7 +5,7 @@ when:
 
 steps:
   - name: test
-    image: golang:1.27-alpine
+    image: golang:1.27
     environment:
       GOPROXY: https://goproxy.cn,direct
       GOSUMDB: sum.golang.google.cn
@@ -14,7 +14,7 @@ steps:
       - go vet ./...
       - go test ./... -race -count=1
       - go build ./...
-
+      
   - name: lint
     image: golangci/golangci-lint:v2.14.0
     environment:
