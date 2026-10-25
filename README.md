@@ -29,6 +29,9 @@ mc-monitor 在 `/metrics` handler 中同步探测，单个目标卡住会导致�
 
 ## 快速开始
 
+### 方式一 : docker run 
+
+
 ```bash
 docker run -d \
   --name mcping-exporter \
@@ -40,6 +43,20 @@ docker run -d \
 ```
 
 国内访问 ghcr.io 不佳时，可改用南京大学镜像：`ghcr.nju.edu.cn/tobby-000/mcping-exporter:latest`
+
+### 方式二 : docker compose
+
+
+仅提供样例，请自行了解 compose 部署方式。完整文件见 [examples/standalone](examples/standalone)
+
+
+```bash
+cd examples/standalone
+cp .env.example .env
+docker compose up -d
+docker compose ps
+```
+
 
 ## 配置
 

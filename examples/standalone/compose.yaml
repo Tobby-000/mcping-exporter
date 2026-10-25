@@ -1,0 +1,27 @@
+name: mcping-exporter
+
+services:
+  mcping-exporter:
+    # 生产建议固定 digest：ghcr.nju.edu.cn/tobby-000/mcping-exporter@sha256:xxxx
+    image: ghcr.nju.edu.cn/tobby-000/mcping-exporter:latest
+    container_name: mcping-exporter
+    restart: unless-stopped
+    init: true
+    command: ["--config", "/config/config.yaml"]
+    pull_policy: always
+    volumes:
+      - ./config.yaml:/config/config.yaml:ro
+    ports:
+      - "${MCPING_BIND_IP:-127.0.0.1}:${MCPING_HOST_PORT:-9090}:9090"
+    environment:
+      - TZ=Asia/Shanghai
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
