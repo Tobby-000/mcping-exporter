@@ -11,6 +11,7 @@ probe:
   limit: 20
 
 # 目标设置
+# 请保证目标 name 全局唯一 
 # 支持SRV，支持省去默认端口 25565
 targets:
   - name: example1

@@ -74,6 +74,7 @@ probe:
   limit: 20
 
 # 目标设置
+# 请保证目标 name 全局唯一（会作为 Prometheus 指标的 server 标签值）
 # 支持SRV，支持省去默认端口 25565
 targets:
   - name: example1
@@ -88,6 +89,9 @@ targets:
 - host:port：直接连接，不查 SRV
 - IPv4 / IPv6：直接连接，IPv6 用方括号（[::1]:25565）
 
+`targets` 里的 `name` 全局唯一，它会作为 Prometheus 指标的 `server` 标签值，重复会导致标签冲突。
+
+`targets` 支持热重载，运行时更新文件即可更新目标列表；其他字段不支持热重载，请重启更新。
 
 ---
 
