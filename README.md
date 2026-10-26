@@ -129,6 +129,11 @@ flowchart LR
 ```
 ## Grafana Dashboard
 
+
+![MCPING Dashboard](docs/grafana-dashboard.png)
+
+---
+
 [examples/dashboard.json](examples/dashboard.json) 提供了示例面板，包含：
 
 - 服务器在线状态
